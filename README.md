@@ -14,7 +14,16 @@ app in the same directory.
 This method works on my Raspberry Pi.
 
 This version uses kotlin instead of java. See my other repository for java:
-[apkwithmake](https://github.com/sanjayrao77/apkwithmake)..
+[apkwithmake](https://github.com/sanjayrao77/apkwithmake).
+
+## Kotlin notes
+
+You'll need to install the kotlin compiler. I placed mine in /opt and
+retrieved it as *kotlin-compiler-1.4.21.zip* from github. It works on
+my raspbian.
+
+You'll also still need a java compiler to compile R.java from aapt. If
+you'd be willing to convert R.java to kotlin, you wouldn't need javac.
 
 ## Usage
 
