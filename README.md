@@ -35,7 +35,7 @@ However, if I run my _dx_ against _kotlin-stdlib.jar_, _dx_ returns this error:
 PARSE ERROR:
 unsupported class file version 53.0
 ...while parsing META-INF/versions/9/module-info.class
-1 error; aboring
+1 error; aborting
 ```
 
 As a workaround, this example will extract the _class_ files from _kotlin-stdlib.jar_
@@ -46,7 +46,7 @@ may be able to skip this workaround. See the comment in _Makefile_ where _dx_ is
 
 ## Bash output
 ```
-guilty@ftl:~/src/android/skel-kotlin\guilty@ftl:~/src/android/skel-kotlin$ make
+guilty@ftl:~/src/android/skel-kotlin$ make
 mkdir -p /tmp/androidbuild
 cp AndroidManifest.xml /tmp/androidbuild/AndroidManifest.xml
 mkdir -p /tmp/androidbuild/res/drawable
