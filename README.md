@@ -14,16 +14,7 @@ app in the same directory.
 This method works on my Raspberry Pi.
 
 This version uses kotlin instead of java. See my other repository for java:
-[apkwithmake](https://github.com/sanjayrao77/apkwithmake).
-
-## Kotlin notes
-
-You'll need to install the kotlin compiler. I placed mine in /opt and
-retrieved it as *kotlin-compiler-1.4.21.zip* from github. It works on
-my raspbian.
-
-You'll also still need a java compiler to compile R.java from aapt. If
-you'd be willing to convert R.java to kotlin, you wouldn't need javac.
+[apkwithmake](https://github.com/sanjayrao77/apkwithmake)..
 
 ## Usage
 
@@ -34,15 +25,35 @@ Try "make unsigned" to start. If that builds fine, then try "make debug"
 and "make release" to make a debug apk and a release apk, similar to
 "ant debug" and "ant release".
 
+## Kotlin stdlib
+
+Kotlin code depends on having supporting libraries present. The compiler
+conveniently comes with _kotlin-stdlib.jar_ which contains such libraries.
+
+However, if I run my _dx_ against _kotlin-stdlib.jar_, _dx_ returns this error:
+```
+PARSE ERROR:
+unsupported class file version 53.0
+...while parsing META-INF/versions/9/module-info.class
+1 error; aboring
+```
+
+As a workaround, this example will extract the _class_ files from _kotlin-stdlib.jar_
+and remove the offending META-INF files.
+
+If your version of _dx_ works with your version of _kotlin-stdlib.jar_, you
+may be able to skip this workaround. See the comment in _Makefile_ where _dx_ is called.
+
 ## Bash output
-```bash
-guilty@ftl:~/src/android/skel-kotlin$ make
+```
+guilty@ftl:~/src/android/skel-kotlin\guilty@ftl:~/src/android/skel-kotlin$ make
 mkdir -p /tmp/androidbuild
 cp AndroidManifest.xml /tmp/androidbuild/AndroidManifest.xml
 mkdir -p /tmp/androidbuild/res/drawable
 mkdir -p /tmp/androidbuild/res/layout
 mkdir -p /tmp/androidbuild/res/values
 mkdir -p /tmp/androidbuild/src/com/example/skeleton
+mkdir -p /tmp/androidbuild/kotlin
 cp icon.png /tmp/androidbuild/res/drawable/
 cp main.xml /tmp/androidbuild/res/layout/
 cp strings.xml /tmp/androidbuild/res/values/
@@ -55,20 +66,22 @@ WARNING: Illegal reflective access by com.intellij.util.ReflectionUtil to method
 WARNING: Please consider reporting this to the maintainers of com.intellij.util.ReflectionUtil
 WARNING: Use --illegal-access=warn to enable warnings of further illegal reflective access operations
 WARNING: All illegal access operations will be denied in a future release
-/usr/lib/android-sdk/build-tools/27.0.1/dx --dex --output=/tmp/androidbuild/classes.dex /tmp/androidbuild/obj
+unzip -q /opt/kotlin/kotlinc/lib/kotlin-stdlib.jar -d /tmp/androidbuild/kotlin
+rm -rf /tmp/androidbuild/kotlin/META-INF
+/usr/lib/android-sdk/build-tools/27.0.1/dx --dex --output=/tmp/androidbuild/classes.dex /tmp/androidbuild/obj /tmp/androidbuild/kotlin
 mkdir -p /tmp/androidbuild/bin
 /usr/bin/aapt package -f -m -F /tmp/androidbuild/bin/skeleton.unaligned.apk -M /tmp/androidbuild/AndroidManifest.xml -S /tmp/androidbuild/res -I /usr/lib/android-sdk/platforms/android-19/android.jar
 cd /tmp/androidbuild ; /usr/bin/aapt add /tmp/androidbuild/bin/skeleton.unaligned.apk classes.dex
  'classes.dex'...
 /usr/bin/zipalign -f 4 /tmp/androidbuild/bin/skeleton.unaligned.apk /tmp/androidbuild/bin/skeleton.unsigned.apk
 ls -l /tmp/androidbuild/bin/skeleton.unsigned.apk
--rw-r--r-- 1 guilty guilty 6760 Feb  1 19:45 /tmp/androidbuild/bin/skeleton.unsigned.apk
+-rw-r--r-- 1 guilty guilty 618099 Feb 17 16:37 /tmp/androidbuild/bin/skeleton.unsigned.apk
 
 guilty@ftl:~/src/android/skel-kotlin$ make debug
 cp /tmp/androidbuild/bin/skeleton.unsigned.apk /tmp/androidbuild/bin/skeleton.tosign.apk
 /usr/bin/apksigner sign --ks ~/.android/debug.keystore -ks-pass pass:android /tmp/androidbuild/bin/skeleton.tosign.apk
 mv /tmp/androidbuild/bin/skeleton.tosign.apk /tmp/androidbuild/bin/skeleton.debug.apk
 ls -l /tmp/androidbuild/bin/skeleton.debug.apk
--rw-r--r-- 1 guilty guilty 9348 Feb  1 19:45 /tmp/androidbuild/bin/skeleton.debug.apk
-guilty@ftl:~/src/android/skel-kotlin$ 
+-rw-r--r-- 1 guilty guilty 620688 Feb 17 16:37 /tmp/androidbuild/bin/skeleton.debug.apk
+guilty@ftl:~/src/android/skel-kotlin$
 ```

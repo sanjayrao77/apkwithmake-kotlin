@@ -12,6 +12,7 @@ APKSIGNER=/usr/bin/apksigner
 DX=/usr/lib/android-sdk/build-tools/27.0.1/dx
 JAVAC=/usr/bin/javac
 KOTLINC=/opt/kotlin/kotlinc/bin/kotlinc 
+KOTLINSTDLIB=/opt/kotlin/kotlinc/lib/kotlin-stdlib.jar
 ZIPALIGN=/usr/bin/zipalign
 PASSWORDTXT=~/src/android/private/password.txt
 KEYSTORE=~/src/android/private/my.keystore
@@ -48,6 +49,7 @@ ${DEST}/${SRCDIR}/R.java: ${DEST}/AndroidManifest.xml
 	mkdir -p ${DEST}/res/layout
 	mkdir -p ${DEST}/res/values
 	mkdir -p ${DEST}/${SRCDIR}
+	mkdir -p ${DEST}/kotlin
 	cp icon.png ${DEST}/res/drawable/
 	cp main.xml ${DEST}/res/layout/
 	cp strings.xml ${DEST}/res/values/
@@ -59,7 +61,13 @@ ${DEST}/obj/${PACKAGE}/Main.class: ${DEST}/${SRCDIR}/R.java
 	${KOTLINC} -classpath ${JARFILE}:${DEST}/obj/${PACKAGE} -d ${DEST}/obj ${DEST}/src/${PACKAGE}/*.kt
 
 ${DEST}/classes.dex: ${DEST}/obj/${PACKAGE}/Main.class
-	${DX} --dex --output=${DEST}/classes.dex ${DEST}/obj
+# if your KOTLINSTDLIB works with your dx, uncomment the next line and remove the workaround below
+#	${DX} --dex --output=${DEST}/classes.dex ${DEST}/obj ${KOTLINSTDLIB}
+# my stdlib doesn't work with my dx and the following is a workaround
+# to disable this workaround, remove the next 3 lines
+	unzip -q ${KOTLINSTDLIB} -d ${DEST}/kotlin
+	rm -rf ${DEST}/kotlin/META-INF
+	${DX} --dex --output=${DEST}/classes.dex ${DEST}/obj ${DEST}/kotlin
 
 ${DEST}/AndroidManifest.xml: AndroidManifest.xml
 	mkdir -p ${DEST}
